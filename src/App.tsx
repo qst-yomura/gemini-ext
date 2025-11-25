@@ -84,9 +84,9 @@ function App() {
               value={selectedMode}
               onChange={handleModeChange}
             >
-              <option value="keigo">敬語</option>
+              <option value="yasashi">やんわり説明</option>
               <option value="ojosama">お嬢様</option>
-              <option value="osaka">大阪弁</option>
+              <option value="osaka">関西弁</option>
               <option value="tsundere">ツンデレ</option>
             </select>
             <textarea className='w-20 h-20' onKeyDown={onkeydownHandler} />

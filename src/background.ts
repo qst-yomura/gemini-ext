@@ -1,6 +1,6 @@
 const prompt = [
     {
-        role: "ojosama",
+        role: "yasashi",
         prompt: ""
     },
     {
@@ -18,3 +18,4 @@ const prompt = [
 ];
 
 console.log(prompt);
+

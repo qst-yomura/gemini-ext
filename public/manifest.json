@@ -9,5 +9,13 @@
     "default_title": "Writer test",
     "default_popup": "src/popup/index.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["file:///D:/%E5%80%8B%E4%BA%BA%E7%94%A8%E3%83%A1%E3%83%A2%E3%81%AA%E3%81%A9/LT/%E3%82%AF%E3%83%A9%E3%82%A4%E3%82%A2%E3%83%B3%E3%83%88%E3%82%B5%E3%82%A4%E3%83%89LLM/page/index.html"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
   "description": "説明"
 }
