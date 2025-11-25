@@ -10,17 +10,24 @@ function App() {
   const agentGen = useCallback(
     async (prompt: string) => {
       const isRewriterAvailable = 'Rewriter' in self;
+      console.log("isRewriterAvailable:", isRewriterAvailable);
       if (!isRewriterAvailable) return;
       const availability: Availability = await Rewriter.availability();
+      console.log(availability);
       if (availability == "available") {
         if (sessionRef.current === null)
+          console.log("sessionRef is null");
           sessionRef.current = await Rewriter.create({
+            expectedInputLanguages: ["ja"],
             outputLanguage: "ja",
         });
-        const answer = sessionRef.current.rewrite(prompt, {context: "お嬢様で！"});
+        console.log("creat sessionRef");
+        const answer = sessionRef.current.rewrite(prompt, {context: "お嬢様の口調で書き換えて。"});
           // ストリームからチャンクを読み取る
+        console.log(answer);
         answer.then((res) => { console.log(res) })
-      } else {
+        .catch((err) => { console.error(err) });
+      } else if(availability == "downloadable") {
           sessionRef.current = await Rewriter.create({
           monitor(m) {
             m.addEventListener("downloadprogress", e => {
