@@ -1,58 +1,58 @@
 import './App.css'
-import { useCallback, useRef, useState, type KeyboardEvent } from 'react'
+import { useState } from 'react'
 
 function App() {
   const [selectedMode, setSelectedMode] = useState<string>(() => {
     return localStorage.getItem('translationMode') || 'keigo'
   })
-  const sessionRef = useRef<Rewriter>(null);
+  // const sessionRef = useRef<Rewriter>(null);
   // const [availability, setAvailability] = useState<boolean>(false);
-  const agentGen = useCallback(
-    async (prompt: string) => {
-      const isRewriterAvailable = 'Rewriter' in self;
-      console.log("isRewriterAvailable:", isRewriterAvailable);
-      if (!isRewriterAvailable) return;
-      const availability: Availability = await Rewriter.availability();
-      console.log(availability);
-      if (availability == "available") {
-        if (sessionRef.current === null)
-          console.log("sessionRef is null");
-          sessionRef.current = await Rewriter.create({
-            expectedInputLanguages: ["ja"],
-            outputLanguage: "ja",
-        });
-        console.log("creat sessionRef");
-        const answer = sessionRef.current.rewrite(prompt, {context: "お嬢様の口調で書き換えて。"});
-          // ストリームからチャンクを読み取る
-        console.log(answer);
-        answer.then((res) => { console.log(res) })
-        .catch((err) => { console.error(err) });
-      } else if(availability == "downloadable") {
-          sessionRef.current = await Rewriter.create({
-          monitor(m) {
-            m.addEventListener("downloadprogress", e => {
-              console.log(`Downloaded ${e.loaded * 100}%`);
-            });
-          }
-        });
-      }
-    }
-  ,[]);
+  // const agentGen = useCallback(
+  //   async (prompt: string) => {
+  //     const isRewriterAvailable = 'Rewriter' in self;
+  //     console.log("isRewriterAvailable:", isRewriterAvailable);
+  //     if (!isRewriterAvailable) return;
+  //     const availability: Availability = await Rewriter.availability();
+  //     console.log(availability);
+  //     if (availability == "available") {
+  //       if (sessionRef.current === null)
+  //         console.log("sessionRef is null");
+  //         sessionRef.current = await Rewriter.create({
+  //           expectedInputLanguages: ["ja"],
+  //           outputLanguage: "ja",
+  //       });
+  //       console.log("creat sessionRef");
+  //       const answer = sessionRef.current.rewrite(prompt, {context: "お嬢様の口調で書き換えて。"});
+  //         // ストリームからチャンクを読み取る
+  //       console.log(answer);
+  //       answer.then((res) => { console.log(res) })
+  //       .catch((err) => { console.error(err) });
+  //     } else if(availability == "downloadable") {
+  //         sessionRef.current = await Rewriter.create({
+  //         monitor(m) {
+  //           m.addEventListener("downloadprogress", e => {
+  //             console.log(`Downloaded ${e.loaded * 100}%`);
+  //           });
+  //         }
+  //       });
+  //     }
+  //   }
+  // ,[]);
 
-  const onkeydownHandler = useCallback(
-    ({
-      currentTarget: { value },
-      ctrlKey,
-      metaKey,
-      code,
-    }: KeyboardEvent<HTMLTextAreaElement>) => {
-      if ([ctrlKey, metaKey].includes(true) && code === "Enter") {
+  // const onkeydownHandler = useCallback(
+  //   ({
+  //     currentTarget: { value },
+  //     ctrlKey,
+  //     metaKey,
+  //     code,
+  //   }: KeyboardEvent<HTMLTextAreaElement>) => {
+  //     if ([ctrlKey, metaKey].includes(true) && code === "Enter") {
 
-        void agentGen(value);
-      }
-    },
-    [agentGen]
-  );
+  //       void agentGen(value);
+  //     }
+  //   },
+  //   [agentGen]
+  // );
 
 
   const isRewriterAvailable = 'Rewriter' in self;
@@ -60,8 +60,9 @@ function App() {
 
   const handleModeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newMode = event.target.value
-    setSelectedMode(newMode)
-    localStorage.setItem('translationMode', newMode)
+    console.log("Selected mode:", newMode)
+    setSelectedMode(newMode);
+    localStorage.setItem('translationMode', newMode);
   }
   return (
     <main className='w-xl'>
@@ -89,7 +90,7 @@ function App() {
               <option value="osaka">関西弁</option>
               <option value="tsundere">ツンデレ</option>
             </select>
-            <textarea className='w-20 h-20' onKeyDown={onkeydownHandler} />
+
           </>
         )
       }

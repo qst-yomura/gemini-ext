@@ -5,15 +5,16 @@ const promptMap: { [key: string]: string } = {
     "ojosama": "絵文字(emoji)だけが与えられた場合、言及せず、書き換えを行わないでください。あなたはお嬢様です。優雅なお嬢様風の口調に書き換えてください。与えられた文字列に対する返答は不要。与えられた文字列の書き換えだけに注力してください。"
 };
 
-export const rewrite = async (prompt: string, session: Rewriter, translateMode: string | null): Promise<string | undefined> => {
+export const rewrite = async (prompt: string, session: Rewriter, translateMode: string): Promise<string | undefined> => {
     let ret: string = "";
     if (session === null)
         console.log("session is null");
-    await session.rewrite(prompt, { context: promptMap[translateMode || "yasashi"] }).then((res) => { ret = res; }).catch((err) => { ret = err.toString(); });
+    console.log("translateMode:", promptMap[translateMode]);
+    await session.rewrite(prompt, { context: promptMap[translateMode] }).then((res) => { ret = res; }).catch((err) => { ret = err.toString(); });
     return ret;
 }
 
-export const createSession = async (translateMode: string | null): Promise<Rewriter> => {
+export const createSession = async (): Promise<Rewriter> => {
     let session: Rewriter | null = null;
     const isRewriterAvailable = 'Rewriter' in self;
     if (!isRewriterAvailable) throw new Error("Rewriter is not available");
@@ -22,7 +23,7 @@ export const createSession = async (translateMode: string | null): Promise<Rewri
         session = await Rewriter.create({
             expectedInputLanguages: ["ja"],
             outputLanguage: "ja",
-            sharedContext: promptMap[translateMode || "yasashi"]
+            sharedContext: "あなたは優秀な編集者です。与えられた指示に従い、文章を編集してください。"
         });
 
         return session;
@@ -35,7 +36,7 @@ export const createSession = async (translateMode: string | null): Promise<Rewri
             },
             expectedInputLanguages: ["ja"],
             outputLanguage: "ja",
-            sharedContext: promptMap[translateMode || "yasashi"]
+            sharedContext: "あなたは優秀な編集者です。与えられた指示に従い、文章を編集してください。"
         });
         return session;
     }

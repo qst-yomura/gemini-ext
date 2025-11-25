@@ -93,10 +93,17 @@ async function rewriteText(original: string): Promise<string> {
         }
         
         // 絵文字を除いたテキストを変換
-        let result: string = "";
-        await rewrite(textWithoutEmojis, sessionRef!, translateMode).then((res) => { 
-            if (typeof res === "string") result = res;
-        });
+        let result: string;
+        try {
+            if (translateMode === null) {
+                translateMode = 'keigo';
+            }
+            const output = await rewrite(textWithoutEmojis, sessionRef!, translateMode);
+            result = typeof output === "string" ? output : textWithoutEmojis;
+        } catch (error) {
+            console.error("Failed to rewrite text", error);
+            result = textWithoutEmojis;
+        }
         
         // 変換後のテキストに絵文字を元の位置に復元
         const restoredText = restoreEmojis(result, emojis, trimmed.length);
@@ -118,9 +125,9 @@ async function processTextNode(node: Text): Promise<void> {
     }
 }
 
-function traverse(node: Node): void {
+async function traverse(node: Node): Promise<void> {
     if (node.nodeType === Node.TEXT_NODE) {
-        processTextNode(node as Text);
+        await processTextNode(node as Text);
         return;
     }
 
@@ -130,51 +137,38 @@ function traverse(node: Node): void {
         if (element instanceof HTMLElement && element.isContentEditable) return;
 
         for (const child of Array.from(element.childNodes)) {
-            traverse(child);
+            await traverse(child);
         }
         return;
     }
 
     if (node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
         for (const child of Array.from(node.childNodes)) {
-            traverse(child);
+            await traverse(child);
         }
     }
 }
 
-function observeMutations(root: Node): void {
-    const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            if (mutation.type === "characterData") {
-                processTextNode(mutation.target as Text);
-                continue;
-            }
-
-            for (const added of mutation.addedNodes) {
-                traverse(added);
-            }
-        }
-    });
-
-    observer.observe(root, {
-        characterData: true,
-        childList: true,
-        subtree: true,
+function waitForDocumentComplete(): Promise<void> {
+    if (document.readyState === "complete") return Promise.resolve();
+    return new Promise((resolve) => {
+        window.addEventListener("load", () => resolve(), { once: true });
     });
 }
 
 async function start(): Promise<void> {
+    await waitForDocumentComplete();
+
     const root = document.body ?? document.documentElement;
-    console.log("root:", root);
     if (!root) return;
-    
-    sessionRef = await createSession(translateMode);
-    traverse(root);
-    observeMutations(root);
+
+    sessionRef = await createSession();
+    await traverse(root);
+    sessionRef = null;
 }
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => void start(), { once: true });
-} else {
+if (document.readyState === "complete") {
     void start();
+} else {
+    window.addEventListener("load", () => void start(), { once: true });
 }
